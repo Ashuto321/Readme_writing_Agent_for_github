@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="./logo.jpg">
+    <title>README Agent for help</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        /* GitHub-style Markdown Styling */
+        .preview-area { color: #1f2328; line-height: 1.6; }
+        .preview-area h1, .preview-area h2 {
+            border-bottom: 1px solid #d0d7de;
+            padding-bottom: 8px;
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        .preview-area ul { list-style-type: disc; padding-left: 20px; }
+        
+        /* Specific Diagram Container styling to enhance readability */
+        .mermaid-container {
+            background: #f8f9fa; /* Light background to make the dark diagram pop */
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 24px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+        /* Style adjustments to make diagrams fill the container */
+        .mermaid-container svg {
+            max-width: 100%;
+            height: auto;
+        }
+        #preview {
+    scroll-behavior: smooth;
+}
+    </style>
+</head>
+
+<body class="bg-[#0d1117] text-[#e6edf3] min-h-screen relative overflow-hidden">
+
+<!-- 🌈 Background Glow -->
+<div class="absolute top-0 left-0 w-[400px] h-[400px] bg-blue-500 opacity-20 blur-3xl rounded-full"></div>
+<div class="absolute bottom-0 right-0 w-[400px] h-[400px] bg-purple-500 opacity-20 blur-3xl rounded-full"></div>
+
+<!-- 🚀 Hero Section -->
+<div class="text-center py-10 relative z-10">
+    <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
+        ⚡ README AI Generator
+    </h1>
+    <p class="text-gray-400 mt-2">
+        Generate production-ready GitHub READMEs with automated architecture diagrams.
+    </p>
+</div>
+
+<!-- NAV -->
+<nav class="px-6 pb-4 flex justify-between relative z-10">
+    <span class="text-sm text-gray-500">Built by Ashutosh 🚀</span>
+</nav>
+
+<div class="container mx-auto p-6 grid lg:grid-cols-2 gap-8 relative z-10">
+
+    <!-- LEFT PANEL -->
+    <div class="bg-white/5 backdrop-blur-lg p-8 rounded-2xl border border-white/10 space-y-4 shadow-2xl">
+
+        <h2 class="text-lg font-semibold text-blue-400">📌 Project Details</h2>
+
+        <input id="projName" placeholder="Project Name"
+            class="w-full p-3 bg-[#0d1117] border border-[#30363d] rounded-lg focus:border-blue-500 outline-none transition">
+
+        <input id="techStack" placeholder="Tech Stack (React, FastAPI, PostgreSQL)"
+            class="w-full p-3 bg-[#0d1117] border border-[#30363d] rounded-lg focus:border-blue-500 outline-none transition">
+
+        <textarea id="projDesc" rows="5"
+            placeholder="Project Description & Key Features..."
+            class="w-full p-3 bg-[#0d1117] border border-[#30363d] rounded-lg focus:border-blue-500 outline-none transition"></textarea>
+
+        <button id="genBtn" onclick="generateReadme()"
+            class="w-full py-4 rounded-xl font-bold bg-gradient-to-r from-green-500 to-emerald-600 
+            hover:scale-105 transition-all duration-300 shadow-lg flex justify-center items-center gap-2">
+
+            <span id="btnText">✨ Generate README</span>
+        </button>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="flex flex-col">
+
+        <div class="flex justify-between mb-3 items-center">
+            <h2 class="text-lg font-semibold text-gray-300">📄 GitHub Preview</h2>
+
+            <div class="flex gap-2">
+                <button onclick="copyMarkdown()"
+                    class="px-4 py-2 bg-[#21262d] border border-[#30363d] rounded-md hover:bg-[#30363d] text-sm transition">
+                    Copy
+                </button>
+
+                <button onclick="downloadMarkdown()"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-md text-sm transition">
+                    Download
+                </button>
+            </div>
+        </div>
+
+        <div id="preview"
+    class="preview-area bg-[#0d1117] text-[#e6edf3] p-6 rounded-xl 
+    h-[600px] overflow-y-auto border border-[#30363d] shadow-inner">
+    <p class="text-gray-500 italic">✨ Your README will appear here...</p>
+</div>
+<div id="toast" 
+    class="fixed top-5 right-5 bg-[#21262d] text-white px-6 py-3 rounded-lg shadow-lg 
+    border border-[#30363d] opacity-0 pointer-events-none transition-all duration-300 z-50">
+    Copied to clipboard!
+</div>
+
+    </div>
+
+</div>
+
+<script>
+async function generateReadme() {
+    const name = document.getElementById("projName").value.trim();
+    const tech = document.getElementById("techStack").value.trim();
+    const desc = document.getElementById("projDesc").value.trim();
+
+    const btn = document.getElementById("genBtn");
+    const btnText = document.getElementById("btnText");
+    const preview = document.getElementById("preview");
+
+    if (!name || !tech || !desc) {
+        alert("Please fill all fields!");
+        return;
+    }
+
+    btn.disabled = true;
+    btnText.innerText = "Processing Diagram...";
+
+    // This prompt is STRICTLY optimized to reproduce the style of image_2.png
+  const prompt = `
+Act as a Senior Open Source Architect and GitHub Documentation Expert.
+
+Generate a HIGH-QUALITY, production-ready GitHub README.md for:
+
+Project Name: ${name}
+Tech Stack: ${tech}
+Description: ${desc}
+
+-------------------------------
+📌 GITHUB README REQUIREMENTS
+-------------------------------
+
+1. TITLE & TAGLINE:
+- Use "# ${name}"
+- Add a strong 1-line value proposition (what problem it solves)
+
+2. BADGES:
+- Add shields.io badges for:
+  - Tech stack
+  - License
+  - Stars (placeholder)
+
+3. 📖 OVERVIEW:
+- Short paragraph explaining the project clearly
+- Focus on real-world value
+
+4. 🧰 TECH STACK:
+- Show tech using "for-the-badge" style badges
+- Group logically if needed
+
+-------------------------------
+🏗️ SYSTEM ARCHITECTURE (STRICT)
+-------------------------------
+
+- Create section: "## 🏗️ System Architecture"
+- Add 1–2 lines explaining flow
+
+- You MUST include a Mermaid diagram using:
+  - graph TD (top-down)
+  - ONLY rectangular nodes
+  - STRICT structure:
+
+User[User/Client]
+V
+UI[Frontend UI]
+V
+API[Backend API]
+ /       \\
+V         V
+LLM[Groq LLM/Model] DB[Database/Data Store]
+
+- Output EXACT Mermaid syntax:
+
+\`\`\`mermaid
+graph TD
+    User --> UI
+    UI --> API
+    API --> LLM
+    API --> DB
+\`\`\`
+
+-------------------------------
+🚀 FEATURES
+-------------------------------
+- Use bullet points
+- Each feature must include BENEFIT (not just name)
+
+-------------------------------
+📦 INSTALLATION
+-------------------------------
+- Step-by-step instructions
+- Use bash code blocks
+- Include placeholder env variables like [YOUR_API_KEY]
+
+-------------------------------
+🛠 USAGE
+-------------------------------
+- Provide real usage example (code or CLI)
+
+-------------------------------
+🖼️ VISUAL SECTION
+-------------------------------
+- Add at least one placeholder image:
+![Architecture](https://via.placeholder.com/800x400?text=Architecture+Diagram)
+
+-------------------------------
+🗺 ROADMAP
+-------------------------------
+- Use checklist format:
+  - [x] Completed
+  - [ ] In Progress
+  - [ ] Future
+
+-------------------------------
+🤝 CONTRIBUTING + 📄 LICENSE
+-------------------------------
+- Add short contributing guide
+- Add MIT license placeholder
+
+-------------------------------
+⚠️ OUTPUT RULES
+-------------------------------
+- Output ONLY raw Markdown
+- No explanations
+- Must be GitHub-render friendly
+- Use proper headings (##)
+- Use emojis for sections
+- Ensure Mermaid renders correctly
+`;
+
+    try {
+        const res = await fetch("http://127.0.0.1:8000/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt })
+        });
+
+        if (!res.ok) throw new Error("Server error");
+
+        const data = await res.json();
+        const markdown = data.choices?.[0]?.message?.content || "No response";
+
+        // 1. Render standard Markdown
+        preview.innerHTML = marked.parse(markdown);
+        preview.dataset.raw = markdown;
+
+        // 2. Render Mermaid Diagrams with the correct container and styling
+        if (window.mermaid) {
+            // Using default theme for strict box consistency
+            mermaid.initialize({ 
+                startOnLoad: false, 
+                theme: 'neutral', 
+                securityLevel: 'loose',
+                flowchart:{
+                    curve: 'linear' // Ensures straight, clean lines like the reference
+                }
+            });
+            
+            const mermaidBlocks = preview.querySelectorAll(".language-mermaid");
+            
+            for (const block of mermaidBlocks) {
+                // Get the raw code inside the block
+                const rawCode = block.innerText.trim();
+                
+                // Create a unique ID for this diagram
+                const id = 'mermaid-' + Math.random().toString(36).substr(2, 5);
+                
+                try {
+                    // Render the diagram and clean up the preview UI
+                    const { svg } = await mermaid.render(id, rawCode);
+                    
+                    const container = document.createElement('div');
+                    container.className = "mermaid-container";
+                    container.innerHTML = svg;
+                    
+                    // Replace the raw code block with the rendered SVG container
+                    block.parentElement.replaceWith(container);
+                } catch (renderError) {
+                    console.error("Mermaid error:", renderError);
+                    block.innerHTML = "<p class='text-red-500 text-xs'>Diagram syntax error.</p>";
+                }
+            }
+        }
+
+    } catch (err) {
+        preview.innerHTML = `<p class="text-red-500">Error: ${err.message}</p>`;
+    } finally {
+        btn.disabled = false;
+        btnText.innerText = "Generate Diagram & README";
+    }
+}
+
+function copyMarkdown() {
+    const raw = document.getElementById("preview").dataset.raw;
+
+    if (!raw) {
+        alert("Nothing to copy!");
+        return;
+    }
+
+    navigator.clipboard.writeText(raw);
+    showToast("Copied to clipboard!");
+}
+function downloadMarkdown() {
+    const raw = document.getElementById("preview").dataset.raw;
+
+    if (!raw) {
+        alert("Nothing to download!");
+        return;
+    }
+
+    const blob = new Blob([raw], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "README.md";
+    document.body.appendChild(a);
+    a.click();
+
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.innerText = message;
+
+    toast.classList.remove("opacity-0", "pointer-events-none");
+    toast.classList.add("opacity-100");
+
+    setTimeout(() => {
+        toast.classList.remove("opacity-100");
+        toast.classList.add("opacity-0", "pointer-events-none");
+    }, 2000);
+}
+</script>
+
+</body>
+</html>
